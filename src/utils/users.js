@@ -6,6 +6,7 @@ const addUser = ({ id,username,room }) => {
     // Clean the data
     username = username.trim().toLowerCase()
     room = room.trim().toLowerCase()
+    const status = "online"
 
     // Validate the data
 
@@ -31,7 +32,7 @@ const addUser = ({ id,username,room }) => {
 
     // Store user.
 
-    const user = { id,username,room}
+    const user = { id,username,room,status}
     users.push(user)
     return {
         user

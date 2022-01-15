@@ -19,9 +19,7 @@ io.on('connection', (socket) => {
     console.log('New WebSocket connection')
 
     socket.on('join', (options,callback) => {
-
         const {error,user} = addUser({id : socket.id,...options})
-
         if(error) {
             return callback(error)
         }
@@ -63,14 +61,26 @@ io.on('connection', (socket) => {
         callback()
     })
 
-    socket.on('disconnect', () => {
+    /*from server side we will emit 'display' event once the user starts typing
+    so that on the client side we can capture this event and display 
+    '<data.user> is typing...' */
+    socket.on('typing', (data)=>{
+        const user = getUser(socket.id)
+        console.log(data)
+        if(data.typing)
+        socket.broadcast.to(user.room).emit('display',{username : user.username,typing:true})
+        else
+        socket.broadcast.to(user.room).emit('display',{username : user.username,typing:false})
+      })
 
+    socket.on('disconnect', () => {
         const user = removeUser(socket.id)
         if(user) {
             io.to(user.room).emit('message', generateMessage('Admin',`${user.username} has left!`))
             io.to(user.room).emit('roomData',{
                 room : user.room,
                 users : getUsersInRoom(user.room)
+                // have to update last seen time in sidebar with username.
             })
         }
     })
